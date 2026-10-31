@@ -235,9 +235,10 @@ def rewrite(model, project_dir, bind_files=False):
                     configs[cname] = {"content": escape_dollars(data.decode("utf-8"))}
                 except UnicodeDecodeError:
                     configs[cname] = {"environment": to_env(data)}
+                # An integer: older Compose (v2.24.7) parses a mode string as decimal.
                 mode = stat.S_IMODE(os.stat(src).st_mode)
                 svc.setdefault("configs", []).append(
-                    {"source": cname, "target": vol["target"], "mode": "0%o" % mode})
+                    {"source": cname, "target": vol["target"], "mode": mode})
                 digests[("configs", cname)] = hashlib.sha256(data).hexdigest()
                 report.append((True, "inlined bind mount %s:%s of service %s (%d bytes)"
                                % (src, vol["target"], sname, len(data))))

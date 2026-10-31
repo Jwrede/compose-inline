@@ -153,7 +153,7 @@ class RewriteTest(unittest.TestCase):
         svc = m["services"]["web"]
         self.assertEqual([v["target"] for v in svc["volumes"]], ["/data", "/outside", "/db"])
         self.assertEqual(svc["configs"], [{"source": "compose-inline-web-0",
-                                           "target": "/etc/nginx/nginx.conf", "mode": "0640"}])
+                                           "target": "/etc/nginx/nginx.conf", "mode": 0o640}])
         self.assertEqual(m["configs"]["compose-inline-web-0"], {"content": "worker_processes 1;\n"})
 
     def test_bind_files_off_by_default(self):
