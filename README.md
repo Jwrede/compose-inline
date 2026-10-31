@@ -182,9 +182,9 @@ name is the same.
   which Linux limits to 128 KiB per value.
 - The containers' `com.docker.compose.project.config_files` label points
   at the deleted temporary file.
-- Tested with Docker Compose v5.0.0 locally and in CI with the Compose
-  version of the GitHub `ubuntu-24.04` runner and v2.24.7, against a
-  `docker:27-dind` host reached over TCP.
+- Tested with Docker Compose v5.0.0 locally and v2.38.2 (GitHub
+  `ubuntu-24.04` runner) and v2.24.7 in CI, each against a Docker 27.5.1
+  host (`docker:27-dind`) reached over TCP. Not tested with Podman.
 
 ## Development
 
