@@ -1,0 +1,61 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  unit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    strategy:
+      matrix:
+        python: ["3.9", "3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - run: python -m pip install -e .
+      - run: python -m unittest discover -s tests -v
+
+  remote-host:
+    # The Docker host is a docker:dind container reached over TCP, so it
+    # cannot see the files of the checkout, like a real remote host.
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        compose: ["runner", "v2.24.7"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install -e .
+      - name: Install docker compose ${{ matrix.compose }}
+        if: matrix.compose != 'runner'
+        run: |
+          mkdir -p ~/.docker/cli-plugins
+          curl -fsSL --max-time 120 -o ~/.docker/cli-plugins/docker-compose \
+            "https://github.com/docker/compose/releases/download/${{ matrix.compose }}/docker-compose-linux-x86_64"
+          chmod +x ~/.docker/cli-plugins/docker-compose
+      - run: docker compose version
+      - name: Start remote Docker host
+        run: |
+          docker run -d --privileged --name remote -e DOCKER_TLS_CERTDIR= \
+            -p 127.0.0.1:23750:2375 docker:27-dind --host=tcp://0.0.0.0:2375
+          for i in $(seq 1 60); do
+            DOCKER_HOST=tcp://127.0.0.1:23750 docker version >/dev/null 2>&1 && break
+            sleep 1
+          done
+          DOCKER_HOST=tcp://127.0.0.1:23750 docker version --format 'remote docker {{.Server.Version}}'
+      - name: End-to-end test
+        env:
+          DOCKER_HOST: tcp://127.0.0.1:23750
+        run: timeout 600 sh tests/e2e.sh

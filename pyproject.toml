@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "compose-inline"
+version = "0.1.0"
+description = "Run docker compose against a remote Docker host with local configs, secrets and bind-mounted files"
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.9"
+authors = [{name = "Jonathan Wrede"}]
+keywords = ["docker", "docker-compose", "docker-context", "secrets", "configs", "remote"]
+classifiers = [
+    "Environment :: Console",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Topic :: System :: Systems Administration",
+    "Topic :: Utilities",
+]
+
+[project.urls]
+Homepage = "https://github.com/Jwrede/compose-inline"
+
+[project.scripts]
+compose-inline = "compose_inline:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
